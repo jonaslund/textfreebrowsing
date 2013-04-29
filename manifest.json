@@ -1,0 +1,30 @@
+{
+  "name": "Text Free Browsing",
+  "version": "4.1",
+  "manifest_version": 2,
+  "description": "Hides all text on every website",
+  "homepage_url": "http://www.newrafael.com/text-free-browsing",
+  "icons": { "16": "icon_16.png",
+             "48": "icon_48.png",
+            "128": "icon_128.png" },
+  "permissions": ["tabs", "*://*/*"],
+  "background": {
+    "page": "index.html"
+  },
+  "content_scripts": [
+    {
+    "matches": ["*://*/*"],
+    "css": ["hides.css"],
+    "js": ["check.js"]
+    },
+    {
+      "matches": ["*://chrome.google.com/webstore*"],
+      "css": ["shows.css"]
+    }
+  ],  
+  "browser_action": {
+    "name": "Start Text Free Browsing",
+    "default_icon": "text-yes.png",
+    "icons": ["text-yes.png", "text-no.png"]
+  }
+}
