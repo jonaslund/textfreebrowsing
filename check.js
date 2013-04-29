@@ -59,8 +59,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
   if(request.method == "stop") {    
     if(styles) {      
       styles.parentNode.removeChild(styles);
-    }
-    
+    }  
     document.getElementsByTagName('html')[0].style.visibility = 'visible';
   }
 
@@ -69,7 +68,6 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     if(!styles) {
       head.appendChild(style);     
     }
-
     document.getElementsByTagName('html')[0].style.visibility = 'visible';     
   }
 

@@ -40,16 +40,13 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 chrome.tabs.onActivated.addListener(function(info) {
   var tabID = info.tabId;
   if(localStorage.getItem("textfree") === "on") {
-
     chrome.tabs.sendMessage(tabID, {method:"switchstart"}, function(response){
     });
 
   } else {
-
     chrome.tabs.sendMessage(tabID, {method:"switchstop"}, function(response){
-    });
-    
-
+    });    
+  
   }
 });
 
