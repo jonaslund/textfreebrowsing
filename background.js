@@ -1,61 +1,70 @@
-var on = 0;
-chrome.browserAction.onClicked.addListener(function(tab) {  
-  if(on === 0) {
+// State to track if text is currently hidden
+let isTextHidden = true;
 
-    chrome.browserAction.setIcon({path: 'text-no.png'});
-    chrome.browserAction.setTitle({title: "Stop Text Free Browsing"});  
-    on = 1;  
-    localStorage.setItem("textfree", "on");
-
-    chrome.tabs.getSelected(null,function(tab) {
-      chrome.tabs.sendMessage(tab.id,{method:"start"}, function(response){
-      });
-    }); 
-
-  } else {
-    
-    on = 0;
-    localStorage.setItem("textfree", "off");
-    chrome.browserAction.setIcon({path: 'text-yes.png'});
-    chrome.browserAction.setTitle({title: "Start Text Free Browsing"});      
-
-
-    chrome.tabs.getSelected(null,function(tab) {
-      chrome.tabs.sendMessage(tab.id,{method:"stop"}, function(response){        
-      });
-    }); 
-
+// Function to toggle text visibility state
+function toggleTextVisibility() {
+  isTextHidden = !isTextHidden;
   
-  }
+  // Store the current state
+  chrome.storage.local.set({ "textfree": isTextHidden ? "on" : "off" });
+  
+  // Update the extension icon based on current state
+  chrome.action.setIcon({
+    path: isTextHidden ? "text-no.png" : "text-yes.png"
+  });
+  
+  // Send message to all tabs to update text visibility
+  chrome.tabs.query({}, function(tabs) {
+    for (let tab of tabs) {
+      chrome.tabs.sendMessage(tab.id, { method: isTextHidden ? "start" : "stop" });
+    }
+  });
+}
+
+// Listen for clicks on the extension icon
+chrome.action.onClicked.addListener(function(tab) {
+  toggleTextVisibility();
 });
 
-chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.method == "getStatus")
-      sendResponse({status: localStorage['textfree']});
-    else
-      sendResponse({}); // snub them.
+// Initialize extension state when the service worker starts
+chrome.runtime.onInstalled.addListener(function() {
+  // Check if we have a saved state
+  chrome.storage.local.get("textfree", function(result) {
+    if (result.textfree === "on") {
+      isTextHidden = true;
+    } else if (result.textfree === "off") {
+      isTextHidden = false;
+    }
+    
+    // Set initial icon
+    chrome.action.setIcon({
+      path: isTextHidden ? "text-no.png" : "text-yes.png"
+    });
+  });
 });
 
+// Replace chrome.extension.onMessage with chrome.runtime.onMessage
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.method == "getStatus") {
+      chrome.storage.local.get("textfree", function(result) {
+        sendResponse({status: result.textfree});
+      });
+      return true; // Required for asynchronous sendResponse
+    }
+});
 
+// Handle tab activation
 chrome.tabs.onActivated.addListener(function(info) {
   var tabID = info.tabId;
-  if(localStorage.getItem("textfree") === "on") {
-    chrome.tabs.sendMessage(tabID, {method:"switchstart"}, function(response){
-    });
-
-  } else {
-    chrome.tabs.sendMessage(tabID, {method:"switchstop"}, function(response){
-    });    
-  
-  }
+  chrome.storage.local.get("textfree", function(result) {
+    if(result.textfree === "on") {
+      chrome.tabs.sendMessage(tabID, {method:"switchstart"});
+    } else {
+      chrome.tabs.sendMessage(tabID, {method:"switchstop"});
+    }
+  });
 });
 
-//get all tabs and insert check.js
-chrome.tabs.query({}, function(tabs) { 
-  for (var i = 0; i < tabs.length; i++) {
-    var tabid = tabs[i].id;
-    chrome.tabs.executeScript(tabid, {
-        file: "check.js"
-    });    
-  }
-});
+// The executeScript method has changed in MV3
+// We can't inject scripts into all tabs on startup like this anymore
+// Instead, we rely on the content scripts defined in the manifest

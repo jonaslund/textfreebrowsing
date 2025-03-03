@@ -1,1 +1,5 @@
-html {visibility: visible !important;}
+/* This CSS ensures text is visible in the Chrome Web Store */
+* {
+  color: initial !important;
+  text-shadow: initial !important;
+}

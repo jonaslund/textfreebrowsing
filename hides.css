@@ -1,1 +1,7 @@
 html {visibility: hidden;}
+
+/* This CSS is applied when text should be hidden */
+.text-free-browsing-active * {
+  color: transparent !important;
+  text-shadow: none !important;
+}
