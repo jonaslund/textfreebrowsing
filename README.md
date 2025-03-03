@@ -7,4 +7,4 @@ http://www.textfreebrowsing.com/<br/>
 
 An art project by Rafaël Rozendaal & Jonas Lund <br/>
 http://www.newrafael.com <br/>
-http://www.jonaslund.biz <br/>
+http://www.jonaslund.com <br/>
